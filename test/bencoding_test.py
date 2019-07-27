@@ -1,3 +1,4 @@
+import pytest
 from bittorrent.bencoding import *
 from test.utils import *
 
@@ -61,3 +62,22 @@ def testBulk():
 
     assert bulk.name == 'Leon'
     assert 'name' in bulk
+
+
+@pytest.mark.parametrize('key, expectedKey', [
+    pytest.param('a b 1', 'aB1'),
+    pytest.param('a  b   1', 'aB1'),
+    pytest.param('a_b_1', 'aB1'),
+    pytest.param('a__b___1', 'aB1'),
+    pytest.param('a-b-1', 'aB1'),
+    pytest.param('a--b---1', 'aB1'),
+    pytest.param('a-b c_d f 1', 'aBCDF1')
+])
+def test_key_normalization(key, expectedKey):
+    bulk = Bulk()
+    bulk[key] = 'abc'
+    
+    actual = Bulk.keyNormalized(bulk)
+
+    assert getattr(actual, expectedKey) == 'abc'
+    

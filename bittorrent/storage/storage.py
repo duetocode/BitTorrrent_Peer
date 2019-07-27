@@ -1,27 +1,26 @@
 import logging
 from pathlib import Path
 from hashlib import sha1
-
-from bittorrent import PieceState, PieceInfo
+from mmap import mmap
+from bittorrent.context import PieceInfo, PieceState
 
 class Storage:
 
     def __init__(self, torrentContext, delegation):
         self.torrentContext = torrentContext
-        self.ctx = ctx
         self._fd = []
-        self.library = Path(library)
+        self.library = Path(torrentContext.home)
         self.logger = logging.getLogger('storage')
         self.delegation = delegation
 
     def savePiece(self, pieceIndex, offset, data, flush=False):
         if len(data) <= 0:
-            logger.warning('Invalid data')
+            self.logger.warning('Invalid data')
             return None
 
         buf = data
         if pieceIndex < 0 or pieceIndex >= len(self.torrentContext.pieces):
-            logger.warning('Invalid piece index.')
+            self.logger.warning('Invalid piece index.')
             return None
 
         pieceInfo = self.torrentContext.pieces[pieceIndex]
@@ -74,23 +73,23 @@ class Storage:
             self.library.mkdir()
         if not self.library.is_dir():
             raise OSError('Download is not a directory.')
-        logger.debug('Library initialized')
+        self.logger.debug('Library initialized')
 
         # Root directory of this storage
-        if self.ctx.isSingleFile():
-            logger.debug('It is a single-file torrent.')
+        if self.torrentContext.isSingleFile():
+            self.logger.debug('It is a single-file torrent.')
             self.root = self.library
         else:
-            logger.debug('It is a multiple-files torrent.')
-            self.root = Path(self.library, self.ctx.getName())
+            self.logger.debug('It is a multiple-files torrent.')
+            self.root = Path(self.library, self.torrentContext.getName())
             if not self.root.exists():
                 self.root.mkdir()
-                logger.info('Directory created.')
+                self.logger.info('Directory created.')
             elif self.root.is_file:
                 raise OSError('Root directory exists but it is a file.')
 
         # Open all files
-        for fileInfo in self.ctx.files:
+        for fileInfo in self.torrentContext.files:
             file = Path(self.root, *fileInfo.path, fileInfo.name)
             # Create the file if not exists
             if not file.exists():
@@ -100,7 +99,7 @@ class Storage:
                         fd.write(b'\0')
             fd = open(file, 'r+b')
             self._fd.append((fd, mmap(fd.fileno(), 0)))
-            logger.info('File %s has been created.', fileInfo.name)
+            self.logger.info('File %s has been created.', fileInfo.name)
 
     def shutdown(self):
         for fd in self._fd:

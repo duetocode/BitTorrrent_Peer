@@ -1,3 +1,5 @@
+import re 
+
 class ByteStringBuffer:
 
     def __init__(self, buf):
@@ -97,8 +99,70 @@ def decodeDict(buf:ByteStringBuffer):
     return result
 
 
-class Bulk(dict):
+class Bulk():
+
+    @classmethod
+    def keyNormalized(clz, bulk):
+        newBulk = Bulk()
+        pattern = re.compile(r"""[_\- ]+\w""")
+        for key, value in bulk.items():
+            for str in pattern.findall(key):
+                key = key.replace(str, str[-1:].upper())
+            newBulk[key] = value
+        return newBulk
+
+    def __init__(self, source=None):
+        if source is not None and type(source) is dict:
+            object.__setattr__(self, '_dict', source)
+        else:
+            object.__setattr__(self, '_dict', {})
+    
+    def items(self):
+        return self._dict.items()
+
+    def keys(self):
+        return self._dict.keys()
+
+    def get(self, key, default=None):
+        a = {}
+        if key in self._dict:
+            return self._dict[key]
+        else:
+            return default
+
+    def __getitem__(self, key):
+        _dict = object.__getattribute__(self, '_dict')
+        return _dict[key]
+
+    def __delitem__(self, key):
+        del self._dict[key]
+    
+    def __setitem__(self, key, value):
+        self._dict[key] = value
+
+    def __setattr__(self, name, value):
+        _dict = object.__getattribute__(self, '_dict')
+        if name == '_dict':
+            object.__setattr__(self, '_dict', value)
+        else:
+            self._dict[name] = value
 
     def __getattribute__(self, name):
-        if name in self:
-            return self[name]
+        _dict = object.__getattribute__(self, '_dict')
+        if name == '_dict':
+            return _dict
+        elif name in _dict:
+            return _dict[name]
+        else:
+            return object.__getattribute__(_dict, name)
+
+    def __len__(self):
+        _dict = object.__getattribute__(self, '_dict')
+        return len(_dict)
+
+    def __iter__(self):
+        _dict = object.__getattribute__(self, '_dict')
+        return _dict.__iter__()
+
+    def assertAttribute(self, name, type):
+        return name in self and type(self[name]) is type

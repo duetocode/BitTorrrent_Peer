@@ -1,7 +1,7 @@
 import logging
 from twisted.internet.endpoints import TCP4ClientEndpoint, connectProtocol
 
-from .peer_info import PeerInfo
+from .context import PeerInfo
 from .discovery import PeerDiscovery
 from .storage import Storage
 from .controller import ConnectionScheduler, MessageHandler
