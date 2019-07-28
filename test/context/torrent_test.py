@@ -14,4 +14,4 @@ def test_create_from_file():
     assert len(actual.files) == 1
     assert actual.files[0].length == 306184192
     assert actual.files[0].name == 'debian-9.9.0-amd64-netinst.iso'
-    assert actual.files[0].directory == []
+    assert actual.files[0].path == []

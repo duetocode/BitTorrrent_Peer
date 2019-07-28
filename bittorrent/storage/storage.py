@@ -14,6 +14,7 @@ class Storage:
         self.delegation = delegation
 
     def savePiece(self, pieceIndex, offset, data, flush=False):
+        # Verification
         if len(data) <= 0:
             self.logger.warning('Invalid data')
             return None
@@ -23,11 +24,16 @@ class Storage:
             self.logger.warning('Invalid piece index.')
             return None
 
+        # Locate the pirce
+        pieceLength = self.torrentContext.torrentInfo.info['piece length']
         pieceInfo = self.torrentContext.pieces[pieceIndex]
 
+        if pieceInfo.state == PieceState.Have:
+            # Do not write data to already downloaded piece
+            return
+
         # locate file and offset
-        fileIndex, offsetInFile = self.torrentContext.locateFileAndOffset(pieceIndex)
-        offsetInFile += offset
+        fileIndex, offsetInFile = self._locateFileAndOffset(pieceIndex, offset)
 
         # write data into files
         while len(buf) > 0 and fileIndex < len(self.torrentContext.files):
@@ -38,17 +44,30 @@ class Storage:
             mm[offsetInFile:offsetInFile+lengthToWrite] = buf[:lengthToWrite]
             buf = buf[lengthToWrite:]
             
-            if offsetInFile+lengthToWrite == fileSize and self.verify(fileIndex):
-                self._fileDownloaded(fileIndex)
-            elif flush:
+            if flush:
                 self._fd[fileIndex][1].flush(offsetInFile, lengthToWrite)
 
             fileIndex += 1
             offsetInFile = 0
         
         # report piece downloaded event
-        if offset + len(data) == self.torrentContext.metaInfo.pieceLength:
+        pieceInfo.progress += len(data)
+        if pieceInfo.progress >= pieceLength:
             self._pieceDownloaded(pieceIndex)
+
+    def loadPiece(self, pieceIndex):
+        pieceLength = self.torrentContext.torrentInfo.info['piece length']
+        fileIndex, offsetInFile = self._locateFileAndOffset(pieceIndex, 0)
+
+        buf = b''
+        while fileIndex < len(self.torrentContext.files) and len(buf) < pieceLength:
+            buf += self._fd[fileIndex][1][ offsetInFile : offsetInFile+pieceLength-len(buf) ]
+            fileIndex += 1
+            offsetInFile = 0
+
+        assert len(buf) == pieceLength
+
+        return buf    
 
     def isFinished(self):
         return all([p.state == PieceState.Have for p in self.torrentContext.pieces])
@@ -62,10 +81,19 @@ class Storage:
         else:
             pieceInfo.state = PieceState.NotHave
 
-    def _fileDownloaded(self, fileIndex):
-        self._fd[fileIndex][1].flush()
-        self.torrentContext.files[fileIndex].downloaded = True
-        self.delegation.fileDownloaded(fileIndex)
+    def _locateFileAndOffset(self, pieceIndex:int, offset:int) -> (int, int):
+        pieceLength = self.torrentContext.torrentInfo.info['piece length']
+        globalOffset = pieceIndex * pieceLength + offset
+
+        counter = 0
+        for i, fileInfo in enumerate(self.torrentContext.files):
+            end = counter + fileInfo.length
+            if end >= globalOffset:
+                return i, globalOffset - counter
+            else:
+                counter = end
+
+        raise IndexError()
 
     def start(self):
         # The library directory

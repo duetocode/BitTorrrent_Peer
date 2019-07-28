@@ -74,7 +74,9 @@ def _buildPieceList(torrentInfo:Bulk) -> List[PieceInfo]:
 
     for i in range(0, len(pieces), 20):
         hash = pieces[i:i+20]
-        result.append(PieceInfo(index=i, hash=hash))
+        pieceInfo = PieceInfo(index=i, hash=hash)
+        pieceInfo.progress = 0
+        result.append(pieceInfo)
 
     return result
 
