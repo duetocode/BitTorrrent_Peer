@@ -8,6 +8,6 @@ class PieceState:
 class PieceInfo:
 
     def __init__(self, index=0, state=PieceState.Unknown):
-        self.index = index,
+        self.index = index
         self.state = state
-        
+        self.hash = None

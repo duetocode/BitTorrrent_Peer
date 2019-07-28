@@ -86,6 +86,7 @@ def decodeList(buf:ByteStringBuffer):
     return result
 
 def decodeDict(buf:ByteStringBuffer):
+    b = len(buf)
     assert buf.pop() == ord('d')
 
     result = Bulk()
@@ -95,6 +96,8 @@ def decodeDict(buf:ByteStringBuffer):
         result[key] = value
 
     buf.pop()
+    
+    result['_range'] = (b, len(buf))
 
     return result
 
@@ -163,6 +166,3 @@ class Bulk():
     def __iter__(self):
         _dict = object.__getattribute__(self, '_dict')
         return _dict.__iter__()
-
-    def assertAttribute(self, name, type):
-        return name in self and type(self[name]) is type

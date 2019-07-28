@@ -44,7 +44,7 @@ def test_decode_dict():
     assert type(actual) == Bulk
     assert actual['a'] == 12
     assert actual['b'] == 78
-
+    assert actual['_range'] == (16, 0)
 def test_decode_torrent_file():
     buf = ByteStringBuffer(load_file(multiple_files_torrent))
 

@@ -1,4 +1,5 @@
-from bittorrent.bencoding import decode, Bulk        
+from bittorrent.bencoding import decode, Bulk, ByteStringBuffer
+import hashlib
 
 def _load(file) -> bytes:
     with open(file, 'rb') as fd:
@@ -17,12 +18,16 @@ class TorrentContext:
 
     @classmethod
     def createFromFile(self, file):
-        torrentInfo = decode(_load(file))
+        rawData = _load(file)
+        torrentInfo = decode(ByteStringBuffer(rawData))
         if not isValidTorrent(torrentInfo):
             raise InvalidTorrentFileError(torrentInfo)
 
         torrentContext = TorrentContext()
         torrentContext.torrentInfo = torrentInfo
+
+        # calculate info hash
+        self.infoHash = calculateInfoHash(torrentInfo, rawData)
         return torrentContext
 
     def isSingleFile(self):
@@ -35,12 +40,20 @@ class InvalidTorrentFileError(Exception):
         super().__init__()
 
 def isValidTorrent(torrentInfo:Bulk) -> bool:
-    result = torrentInfo.assertAttribute('info', Bulk) \
-                and torrentInfo.assertAttribute('announce', bytes) \
-                and torrentInfo.info.assertAttribute('piece length', int) \
-                and torrentInfo.info.assertAttribute('pieces', list) \
-                and torrentInfo.info.assertAttribute('name', bytes) \
-                and (torrentInfo.info.assertAttribute('length', int) \
-                    or torrentInfo.info.assertAttribute('files', list))
+    result = assertAttribute(torrentInfo, 'info', Bulk) \
+                and assertAttribute(torrentInfo, 'announce', bytes) \
+                and assertAttribute(torrentInfo.info, 'piece length', int) \
+                and assertAttribute(torrentInfo.info, 'pieces', bytes) \
+                and assertAttribute(torrentInfo.info, 'name', bytes) \
+                and (assertAttribute(torrentInfo.info, 'length', int) \
+                    or assertAttribute(torrentInfo.info, 'files', list))
 
     return result
+
+def calculateInfoHash(torrentInfo:Bulk, rawData:bytes) -> bytes:
+    range = torrentInfo.info['_range']
+    length = len(rawData)
+    return hashlib.sha1(rawData[length - range[0]:length - range[1]]).digest()
+
+def assertAttribute(self, name, type):
+    return name in self and isinstance(self[name], type)
