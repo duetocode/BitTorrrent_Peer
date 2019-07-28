@@ -1,7 +1,7 @@
 import hashlib
 from typing import List
 from bittorrent.bencoding import decode, Bulk, ByteStringBuffer
-from .piece_info import PieceInfo
+from .piece_info import PieceInfo, PieceState
 from .file_info import FileInfo
 
 
@@ -19,6 +19,7 @@ class TorrentContext:
         self.home = None
         self.knownPeers = []
         self.connectedPeers = {}
+        self.length = -1
 
     @classmethod
     def createFromFile(clz, file):
@@ -33,15 +34,30 @@ class TorrentContext:
         # calculate info hash
         torrentContext.infoHash = calculateInfoHash(torrentInfo, rawData)
 
-        # calculate piece list
+        # buid piece list
         torrentContext.pieces = _buildPieceList(torrentInfo)
 
-        # calculate file lists
+        # build file lists
         torrentContext.files = _buildFileList(torrentContext)
+
+        # calculate data size
+        torrentContext.length = sum(f.length for f in torrentContext.files)
+
+        
         return torrentContext
 
     def isSingleFile(self):
         return 'files' not in self.torrentInfo.info
+
+    def downloaded(self):
+        pieceLength = self.torrentInfo.info['piece length']
+        total = sum(pieceLength for p in self.pieces if p.state == PieceState.Have)
+        # The last block
+        if self.pieces[-1].state == PieceState.Have:
+            total -= pieceLength
+            total += self.length % pieceLength
+            
+        return total
 
 class InvalidTorrentFileError(Exception):
     

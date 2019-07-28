@@ -73,11 +73,3 @@ def readData(file, offset, limit):
     with open(file, 'rb') as fd:
         fd.seek(offset)
         return fd.read(limit - offset)
-
-
-@pytest.fixture()
-def multipleFilesContext(tmpdir):
-    multipleFilesContext = TorrentContext.createFromFile(multiple_files_torrent)    
-    multipleFilesContext.home = Path(tmpdir, 'library')
-
-    return multipleFilesContext

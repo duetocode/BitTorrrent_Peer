@@ -41,7 +41,10 @@ class BitTorrentController:
 
     # -- ConnectionSchedulerDelegation --
     def initiateNewConnection(self, peerInfo:PeerInfo):
-        endpoint = TCP4ClientEndpoint(self.reactor, *peerInfo.endpoint[:2])
+        endpoint = TCP4ClientEndpoint(self.reactor, 
+                                      peerInfo.endpoint.host, 
+                                      peerInfo.endpoint.port)
+                                      
         protocol = BitTorrentProtocol(self.connectionScheduler, self.messageHandler, initiator=True)
         connectProtocol(endpoint, protocol)
         logger.debug('Initiate new connection to %s:%d', *peerInfo.endpoint[:2])
