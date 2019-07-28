@@ -83,13 +83,13 @@ def _buildFileList(torrentContext:TorrentContext) -> List[FileInfo]:
     info = torrentContext.torrentInfo.info
     if torrentContext.isSingleFile():
         fileInfo = FileInfo(name=info.name.decode('utf-8'), 
-                            directory=[],
+                            path=[],
                             length=info.length)
         fileList.append(fileInfo)
     else:
         for file in info.files:
             fileInfo = FileInfo(name=file.path[-1].decode('utf-8'),
-                                directory=file.path[:-1],
+                                path=file.path[:-1],
                                 length=file.length)
             fileList.append(fileInfo)
     

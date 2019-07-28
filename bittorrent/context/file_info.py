@@ -1,7 +1,7 @@
 
 class FileInfo:
 
-    def __init__(self, name, directory, length):
+    def __init__(self, name, path, length):
         self.name = name
-        self.directory = directory
+        self.path = path
         self.length = length

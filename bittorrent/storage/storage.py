@@ -9,7 +9,7 @@ class Storage:
     def __init__(self, torrentContext, delegation):
         self.torrentContext = torrentContext
         self._fd = []
-        self.library = Path(torrentContext.home)
+        self.root = Path(torrentContext.home)
         self.logger = logging.getLogger('storage')
         self.delegation = delegation
 
@@ -69,24 +69,17 @@ class Storage:
 
     def start(self):
         # The library directory
-        if not self.library.exists():
-            self.library.mkdir()
-        if not self.library.is_dir():
+        if not self.root.exists():
+            self.root.mkdir()
+        if not self.root.is_dir():
             raise OSError('Download is not a directory.')
         self.logger.debug('Library initialized')
 
         # Root directory of this storage
         if self.torrentContext.isSingleFile():
             self.logger.debug('It is a single-file torrent.')
-            self.root = self.library
         else:
             self.logger.debug('It is a multiple-files torrent.')
-            self.root = Path(self.library, self.torrentContext.getName())
-            if not self.root.exists():
-                self.root.mkdir()
-                self.logger.info('Directory created.')
-            elif self.root.is_file:
-                raise OSError('Root directory exists but it is a file.')
 
         # Open all files
         for fileInfo in self.torrentContext.files:
