@@ -5,10 +5,10 @@ from .endpoint import Endpoint
 class PeerInfo:
 
     def __init__(self, 
-                 peerId:bytes=None, 
+                 id:bytes=None, 
                  endpoint:Endpoint=None, 
                  pieces:List[PieceInfo]=None):
-        self.peerId = peerId
+        self.id = id
         self.endpoint = endpoint
         self.pieces = pieces
         

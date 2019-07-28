@@ -1,10 +1,10 @@
-from bittorrent.protocol.message import Bitfield
-from bittorrent.peer_info import PeerInfo
 import logging
+from typing import List
 from time import time
 from twisted.internet import task
 import random
 
+from bittorrent.context import PeerInfo
 class ConnectionScheduler:
 
     def __init__(self, connectionSchedulerDelegation):
@@ -58,9 +58,9 @@ class ConnectionScheduler:
         else:
             self.peerDiscovered([peerInfo])
 
-        # report our download progress by sending bitfield message
-        bitfieldMessage = Bitfield(self.delegation.torrentContext.pieces)
-        protocol.sendMessage(bitfieldMessage)
+        # TODO report our download progress by sending bitfield message
+        #bitfieldMessage = Bitfield(self.delegation.torrentContext.pieces)
+        #protocol.sendMessage(bitfieldMessage)
 
     def peerDisconnected(self, protocol):
         # remove from connections map
@@ -73,9 +73,9 @@ class ConnectionScheduler:
     def peerDiscovered(self, peerInfoList:List[PeerInfo]):
         for peerInfo in peerInfoList:
             if peerInfo.id is not None and peerInfo.id not in self.knownPeers:
-                self.knownPeers[peerInfo.id] == peerInfo
+                self.knownPeers[peerInfo.id] = peerInfo
 
-            if peerInfo.endpoint not in self.knownPeers or peerInfo.id != self.knownPeers[peerInfo.endpoint]:
+            if peerInfo.endpoint not in self.knownPeers or peerInfo.id != self.knownPeers[peerInfo.endpoint].id:
                 self.knownPeers[peerInfo.endpoint] = peerInfo
             peerInfo.lastSeen = time()
                     
