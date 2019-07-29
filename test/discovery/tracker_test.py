@@ -17,4 +17,4 @@ def test_tracker_discovery(singleFileContext):
         for peerInfo in actual:
             assert peerInfo.endpoint is not None
             assert peerInfo.endpoint.host is not None and len(peerInfo.endpoint.host) > 7
-            assert peerInfo.endpoint.port > 0 and peerInfo.endpoint.port < 65536
+            assert peerInfo.endpoint.port is not None and type(peerInfo.endpoint.port) == int

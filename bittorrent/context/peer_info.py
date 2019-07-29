@@ -11,4 +11,5 @@ class PeerInfo:
         self.id = id
         self.endpoint = endpoint
         self.pieces = pieces
+        self.lastSeen = 0
         

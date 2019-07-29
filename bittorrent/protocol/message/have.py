@@ -1,5 +1,5 @@
 from .main import Message
-from bittorrent.piece_info import PieceInfo
+from bittorrent.context import PieceInfo
 
 class Have(Message):
 

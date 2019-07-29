@@ -5,6 +5,7 @@ from twisted.internet import task
 import random
 
 from bittorrent.context import PeerInfo
+from bittorrent.protocol.message import Bitfield
 class ConnectionScheduler:
 
     def __init__(self, connectionSchedulerDelegation):
@@ -32,20 +33,20 @@ class ConnectionScheduler:
 
     def _patrol(self):
         # filter out connected peers from known peers list
-        candidates = [p for p in self.knownPeers.values if p.endpoint not in self.connections]
+        candidates = [p for p in self.knownPeers.values() if p.endpoint not in self.connections]
         if len(candidates) == 0:
             self.logger.info('No peers to schedule')
             return
         
-        logger.info('Found %d peers to schedule new connection.', len(candidates))
+        self.logger.info('Found %d peers to schedule new connection.', len(candidates))
 
-        # sort
-        candidates = sorted(candidates, key=lambda c: [c.lastSeen, c.id is not None], reverse=True)
+        # sort by lastSeen and none id
+        candidates = sorted(candidates, key=lambda c: (c.lastSeen, c.id is not None), reverse=True)
 
         # Sample a candidate
         peerInfo = candidates[random.randint(0, len(candidates) - 1)]
 
-        # initiate the connection
+        # ask the delegation to initiate the connection
         self.connections[peerInfo.endpoint] = self.delegation.initiateNewConnection(peerInfo)
 
 
@@ -56,11 +57,11 @@ class ConnectionScheduler:
         if peerInfo is not None:
             peerInfo.id = protocol.peerInfo.id
         else:
-            self.peerDiscovered([peerInfo])
+            self.peerDiscovered([protocol.peerInfo])
 
-        # TODO report our download progress by sending bitfield message
-        #bitfieldMessage = Bitfield(self.delegation.torrentContext.pieces)
-        #protocol.sendMessage(bitfieldMessage)
+        # report our download progress by sending bitfield message
+        bitfieldMessage = Bitfield(self.delegation.pieces)
+        protocol.sendMessage(bitfieldMessage)
 
     def peerDisconnected(self, protocol):
         # remove from connections map

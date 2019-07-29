@@ -1,6 +1,7 @@
+from typing import List
 from bitstring import BitArray
 from .main import Message
-from bittorrent.piece_info import PieceInfo, PieceState
+from bittorrent.context import PieceInfo, PieceState
 
 class Bitfield(Message):
 
@@ -9,7 +10,7 @@ class Bitfield(Message):
         self.pieces = pieces
         
     @classmethod
-    def parse(clazz, rawData:bytes) -> Bitfield:
+    def parse(clazz, rawData:bytes) -> 'Bitfield':
         # parse rawdata into piece info list
         bitArray = BitArray(rawData)
         
