@@ -91,24 +91,27 @@ class PeerDiscovery:
         self.logger.debug('Requesting tracker: %s', url)
 
         req = request.Request(url=url, headers={'User-Agent': 'BitTorrentHunter-1.0.0'})
-        with request.urlopen(req) as res:
-            if res.status != 200:
-                self.logger.warning('Failed to scape peers from tracker: %s State: %d %s',
-                    self.ctx.torrentInfo.announce,
-                    res.status,
-                    res.reason)
-                return None
-            else:
-                data = res.read()
-                res = decode(ByteStringBuffer(data))
-
-                if hasattr(res, 'failure_reason'):
-                    self.logger.warning('Failed to scrape peers from tracker: %s', res.failure_reason)
+        try:
+            with request.urlopen(req) as res:
+                if res.status != 200:
+                    self.logger.warning('Failed to scape peers from tracker: %s State: %d %s',
+                        self.ctx.torrentInfo.announce,
+                        res.status,
+                        res.reason)
                     return None
+                else:
+                    data = res.read()
+                    res = decode(ByteStringBuffer(data))
 
-                if hasattr(res, 'warning_message'):
-                    self.logger.warning('Received a warning message: %s', res.warning_message)
-                return res
+                    if hasattr(res, 'failure_reason'):
+                        self.logger.warning('Failed to scrape peers from tracker: %s', res.failure_reason)
+                        return None
+
+                    if hasattr(res, 'warning_message'):
+                        self.logger.warning('Received a warning message: %s', res.warning_message)
+                    return res
+        except Exception:
+            self.logger.debug('Failed to scrap tracker.')
 
 
 def _mapPeerInfo(info):

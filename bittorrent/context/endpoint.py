@@ -16,6 +16,8 @@ class Endpoint:
             return False
 
         return self.host == value.host and self.port == value.port
-        
+
+    def __str__(self):
+        return f'{self.host}:{self.port}'        
         
 

@@ -9,7 +9,7 @@ class Storage:
     def __init__(self, torrentContext, delegation):
         self.torrentContext = torrentContext
         self._fd = []
-        self.root = Path(torrentContext.home)
+        self.root = Path(torrentContext.root)
         self.logger = logging.getLogger('storage')
         self.delegation = delegation
 

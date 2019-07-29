@@ -16,11 +16,11 @@ def test_start(multipleFilesContext, tmpdir):
     assertDir = lambda p: p.exists() and p.is_dir()
     assertFile = lambda p: p.exists() and p.is_file()
 
-    assert assertDir(Path(multipleFilesContext.home))
-    assert assertFile(Path(multipleFilesContext.home, 'a.txt'))
-    assert assertFile(Path(multipleFilesContext.home, 'b.txt'))
-    assert assertFile(Path(multipleFilesContext.home, 'c.txt'))
-    assert assertFile(Path(multipleFilesContext.home, 'debian-9.9.0-amd64-netinst.iso'))
+    assert assertDir(Path(multipleFilesContext.root))
+    assert assertFile(Path(multipleFilesContext.root, 'a.txt'))
+    assert assertFile(Path(multipleFilesContext.root, 'b.txt'))
+    assert assertFile(Path(multipleFilesContext.root, 'c.txt'))
+    assert assertFile(Path(multipleFilesContext.root, 'debian-9.9.0-amd64-netinst.iso'))
 
 def test_save_piece(multipleFilesContext, tmpdir):
     pieceInfo = multipleFilesContext.pieces[0]
@@ -49,13 +49,13 @@ def test_save_piece(multipleFilesContext, tmpdir):
     
     # check the data    
     assert actualDownloadedPieceIndex == 0
-    actualData = readData(Path(multipleFilesContext.home, *files[0].path, files[0].name), 0, 7)
+    actualData = readData(Path(multipleFilesContext.root, *files[0].path, files[0].name), 0, 7)
     assert actualData == testData[:7]
-    actualData = readData(Path(multipleFilesContext.home, *files[1].path, files[1].name), 0, 7)
+    actualData = readData(Path(multipleFilesContext.root, *files[1].path, files[1].name), 0, 7)
     assert actualData == testData[7:14]
-    actualData = readData(Path(multipleFilesContext.home, *files[2].path, files[2].name), 0, 11)
+    actualData = readData(Path(multipleFilesContext.root, *files[2].path, files[2].name), 0, 11)
     assert actualData == testData[14:25]
-    actualData = readData(Path(multipleFilesContext.home, *files[3].path, files[3].name), 0, pieceLength-25)
+    actualData = readData(Path(multipleFilesContext.root, *files[3].path, files[3].name), 0, pieceLength-25)
     assert actualData == testData[25:]
 
     # Write to the second piece
@@ -65,7 +65,7 @@ def test_save_piece(multipleFilesContext, tmpdir):
         storage.savePiece(1, i, testData[i:i+32])
 
     assert actualDownloadedPieceIndex == 1
-    actualData = readData(Path(multipleFilesContext.home, *files[3].path, files[3].name), pieceLength - 25, pieceLength * 2 - 25)
+    actualData = readData(Path(multipleFilesContext.root, *files[3].path, files[3].name), pieceLength - 25, pieceLength * 2 - 25)
     assert actualData == testData
     
 

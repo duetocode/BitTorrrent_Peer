@@ -20,6 +20,8 @@ class TorrentContext:
         self.knownPeers = []
         self.connectedPeers = {}
         self.length = -1
+        self.port = 0
+        self.host = '0.0.0.0'
 
     @classmethod
     def createFromFile(clz, file):

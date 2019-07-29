@@ -1,26 +1,30 @@
 import logging
 from twisted.internet.endpoints import TCP4ClientEndpoint, connectProtocol
 
-from .context import PeerInfo
+from .context import PeerInfo, TorrentContext
 from .discovery import PeerDiscovery
 from .storage import Storage
-from .controller import ConnectionScheduler, MessageHandler
+from .controller import ConnectionScheduler
 from .protocol import BitTorrentProtocol
 
 
 class BitTorrentController:
 
-    """This is the facade of the controller system."""
+    """Main controller of the BitTorrent system."""
 
-    def init(self, torrentContext, reactor):
+    def __init__(self, torrentContext, reactor):
         self.torrentContext = torrentContext
         self.reactor = reactor
         self.connectionScheduler = ConnectionScheduler(self)
         self.peerDiscovery = PeerDiscovery(torrentContext, self.connectionScheduler)
-        self.storage = Storage(torrentContext)
-        self.messageHandler = MessageHandler(self)
+        self.storage = Storage(torrentContext, self)
         self.logger = logging.getLogger(f'BitTorrentController')
-        self.connections = {}
+
+    @classmethod
+    def createFromTorrentFile(clz, file, root, reactor) -> 'BitTorrentController':
+        torrentContext = TorrentContext.createFromFile(file)
+        torrentContext.root = root
+        return BitTorrentController(torrentContext, reactor)
 
     def start(self):
         self.storage.start()
@@ -41,11 +45,16 @@ class BitTorrentController:
 
     # -- ConnectionSchedulerDelegation --
     def initiateNewConnection(self, peerInfo:PeerInfo):
-        endpoint = TCP4ClientEndpoint(self.reactor, 
-                                      peerInfo.endpoint.host, 
-                                      peerInfo.endpoint.port)
+        #endpoint = TCP4ClientEndpoint(self.reactor, 
+        #                              peerInfo.endpoint.host, 
+        #                              peerInfo.endpoint.port)
                                       
-        protocol = BitTorrentProtocol(self.connectionScheduler, self.messageHandler, initiator=True)
-        connectProtocol(endpoint, protocol)
-        logger.debug('Initiate new connection to %s:%d', *peerInfo.endpoint[:2])
-        return protocol
+        #protocol = BitTorrentProtocol(self.connectionScheduler, self.messageHandler, initiator=True)
+        #connectProtocol(endpoint, protocol)
+        self.logger.debug('Initiate new connection to %s', peerInfo.endpoint)
+        #return protocol
+        return peerInfo
+
+    # -- Storage Delegation --
+    def peiceDownloaded(self, pieceIndex):
+        logger.debug('Piece with index of %d has been downloaded.', pieceIndex)
