@@ -4,7 +4,7 @@ from bittorrent.protocol import BitTorrentProtocol
 def test_dataReceived():
     mockState = MockState(None)
 
-    protocol = BitTorrentProtocol(None, initiateState=mockState)
+    protocol = BitTorrentProtocol(None, None, initiateState=mockState)
     protocol.stateList = [MockState]
 
     # connection made

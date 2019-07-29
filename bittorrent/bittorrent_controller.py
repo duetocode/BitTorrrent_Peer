@@ -49,7 +49,11 @@ class BitTorrentController:
                                       peerInfo.endpoint.host, 
                                       peerInfo.endpoint.port)
                                       
-        protocol = BitTorrentProtocol(self.connectionScheduler, self.messageHandler, initiator=True)
+        protocol = BitTorrentProtocol(
+            torrentContext=self.torrentContext,
+            protocolDelegation=self.connectionScheduler, 
+            peerInfo=peerInfo,
+            initiator=True)
         connectProtocol(endpoint, protocol)
         self.logger.debug('Initiate new connection to %s', peerInfo.endpoint)
         return protocol

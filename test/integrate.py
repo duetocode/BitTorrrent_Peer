@@ -2,6 +2,7 @@ import logging
 import sys
 import binascii
 import shutil
+import signal
 from twisted.internet import reactor
 from bittorrent import BitTorrentController
 
@@ -20,4 +21,10 @@ controller.torrentContext.peerId = binascii.a2b_hex('87cc700d406ca6dbcdbfdc46ea7
 
 controller.start()
 
+def signal_handler(signo, frame):
+    print('Signal received: ', signo)
+    if signo == signal.SIGTERM:
+        reactor.stop()
+
+signal.signal(signal.SIGTERM, signal_handler)
 reactor.run()

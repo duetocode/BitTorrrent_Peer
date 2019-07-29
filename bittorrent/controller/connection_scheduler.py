@@ -18,7 +18,7 @@ class ConnectionScheduler:
     def start(self):
         self.running = True
         self.loopingCall = task.LoopingCall(self._patrol)
-        self.loopingCall.start(1.0)
+        self.loopingCall.start(10.0)
 
     def shutdown(self):
         # Stop patrol loop
@@ -60,7 +60,7 @@ class ConnectionScheduler:
             self.peerDiscovered([protocol.peerInfo])
 
         # report our download progress by sending bitfield message
-        bitfieldMessage = Bitfield(self.delegation.pieces)
+        bitfieldMessage = Bitfield(self.delegation.torrentContext.pieces)
         protocol.sendMessage(bitfieldMessage)
 
     def peerDisconnected(self, protocol):

@@ -7,10 +7,10 @@ class Message:
 
     def toBytes(self):
         """Serialize message object into BitTorrent protocol message"""
-        payload = + self.serialize()
+        payload = self.serialize()
         length = struct.pack('!I', len(payload) + 1)
 
-        return [length, bytes([id()]), payload]
+        return [length, bytes([self.id]), payload]
         
 
 

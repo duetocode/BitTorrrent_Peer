@@ -46,10 +46,10 @@ def test_unkown_peer_connected(scheduler:ConnectionScheduler, mockPeerList):
         discoveredPeers = peers
 
     peerInfo = mockPeerList[0]
-    pieces = ['PIECE']
+    pieces = ["PIECE"]
     scheduler.peerDiscovered = peerDiscovered
 
-    scheduler.delegation = SimpleNamespace(pieces=pieces)
+    scheduler.delegation = SimpleNamespace(torrentContext=SimpleNamespace(pieces=pieces))
     protocol = SimpleNamespace(sendMessage=sendMessage, peerInfo=peerInfo)
     
     scheduler.peerConnected(protocol)
@@ -67,7 +67,7 @@ def test_known_peer_connected(scheduler:ConnectionScheduler, mockPeerList):
     knownPeer = PeerInfo(endpoint=peerInfo.endpoint)
     scheduler.knownPeers[knownPeer.endpoint] = knownPeer
 
-    scheduler.delegation = SimpleNamespace(pieces=pieces)
+    scheduler.delegation = SimpleNamespace(torrentContext=SimpleNamespace(pieces=pieces))
     protocol = SimpleNamespace(sendMessage=sendMessage, peerInfo=peerInfo)
 
     scheduler.peerConnected(protocol)
@@ -101,7 +101,10 @@ def test_patrol_with_empty_cadidates_list(scheduler):
 
 @pytest.fixture()
 def scheduler():
-    return ConnectionScheduler(None)
+    return ConnectionScheduler(SimpleNamespace(
+        torrentContext=SimpleNamespace(
+            pieces=[]
+        )))
 
 @pytest.fixture()
 def mockPeerList():

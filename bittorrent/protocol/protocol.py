@@ -4,6 +4,7 @@ from twisted.internet.protocol import Protocol
 
 from .handshake_state import HandshakeState
 from .connected_state import ConnectedState
+from bittorrent.context import TorrentContext
 
 LENGTH_HEADER = 4
 LENGTH_LIMIT = 1024 * 1024 * 8
@@ -13,10 +14,12 @@ class BitTorrentProtocol(Protocol):
     states = [HandshakeState, ConnectedState]
 
     def __init__(self, 
+                 torrentContext:TorrentContext,
                  protocolDelegation, 
                  peerInfo=None, 
                  initiator=False,
                  initiateState=None):
+        self.torrentContext = torrentContext
         self.delegation = protocolDelegation
         self.initiator = initiator
         self.peerInfo = peerInfo
@@ -27,10 +30,6 @@ class BitTorrentProtocol(Protocol):
             self.state = initiateState
         self.buf = b''
         self.expectedLength = None
-    
-    @property
-    def torrentContext(self):
-        return self.delegation.torrentContext
 
     def sendMessage(self, message):
         """commit message to protocol"""
