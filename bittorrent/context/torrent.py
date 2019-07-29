@@ -24,7 +24,7 @@ class TorrentContext:
         self.host = '0.0.0.0'
 
     @classmethod
-    def createFromFile(clz, file):
+    def createFromFile(clz, file) -> 'TorrentContext':
         rawData = _load(file)
         torrentInfo = decode(ByteStringBuffer(rawData))
         if not isValidTorrent(torrentInfo):

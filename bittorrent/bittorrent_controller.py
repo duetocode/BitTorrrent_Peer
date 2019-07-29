@@ -45,15 +45,14 @@ class BitTorrentController:
 
     # -- ConnectionSchedulerDelegation --
     def initiateNewConnection(self, peerInfo:PeerInfo):
-        #endpoint = TCP4ClientEndpoint(self.reactor, 
-        #                              peerInfo.endpoint.host, 
-        #                              peerInfo.endpoint.port)
+        endpoint = TCP4ClientEndpoint(self.reactor, 
+                                      peerInfo.endpoint.host, 
+                                      peerInfo.endpoint.port)
                                       
-        #protocol = BitTorrentProtocol(self.connectionScheduler, self.messageHandler, initiator=True)
-        #connectProtocol(endpoint, protocol)
+        protocol = BitTorrentProtocol(self.connectionScheduler, self.messageHandler, initiator=True)
+        connectProtocol(endpoint, protocol)
         self.logger.debug('Initiate new connection to %s', peerInfo.endpoint)
-        #return protocol
-        return peerInfo
+        return protocol
 
     # -- Storage Delegation --
     def peiceDownloaded(self, pieceIndex):

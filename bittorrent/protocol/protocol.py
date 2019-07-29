@@ -12,14 +12,25 @@ class BitTorrentProtocol(Protocol):
 
     states = [HandshakeState, ConnectedState]
 
-    def __init__(self, protocolDelegation, peerInfo=None, initiator=False):
+    def __init__(self, 
+                 protocolDelegation, 
+                 peerInfo=None, 
+                 initiator=False,
+                 initiateState=None):
         self.delegation = protocolDelegation
-        self.messageHandler = messageHandler
         self.initiator = initiator
         self.peerInfo = peerInfo
-        self.stateList = list(reversed(states))
-        self.state = self.stateList.pop()
+        self.stateList = list(reversed(BitTorrentProtocol.states))
+        if initiateState is None:
+            self.state = self._nextState()
+        else:
+            self.state = initiateState
         self.buf = b''
+        self.expectedLength = None
+    
+    @property
+    def torrentContext(self):
+        return self.delegation.torrentContext
 
     def sendMessage(self, message):
         """commit message to protocol"""
@@ -32,14 +43,16 @@ class BitTorrentProtocol(Protocol):
         nextState = self.state.packetReceived(packet)
         if nextState:
             oldState = self.state
-            self.state = self.stateList.pop()
+            self.state = self._nextState()
             # We see the transition from handshake to connected as peer-connected event. 
             if type(self.state) == ConnectedState and type(oldState) == HandshakeState:
                 self.delegation.peerConnected(self)
 
     # -- overrides --
     def connectionMade(self):
-        self.state.connectionMake(self)
+        # We do not invoke peerConnected if this callback, 
+        # since we only consider it is connected after a successful handshake
+        self.state.connectionMade()
 
     def connectionLost(self, reason):
         self.delegation.peerDisconnected(self)
@@ -93,3 +106,7 @@ class BitTorrentProtocol(Protocol):
             return LENGTH_HEADER
         else:
             return self.expectedLength
+
+    def _nextState(self):
+        state = self.stateList.pop()(self)
+        return state

@@ -1,8 +1,12 @@
 import logging
 import sys
 import binascii
+import shutil
 from twisted.internet import reactor
 from bittorrent import BitTorrentController
+
+shutil.rmtree('./downloads')
+
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 logging.getLogger().info('Starting test...')
