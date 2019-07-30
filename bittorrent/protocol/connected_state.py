@@ -18,6 +18,6 @@ class ConnectedState:
         if message is not None:
             self.protocol.messageHandler.messageReceived(message, protocol)
         else:
-            self.logger.debug('Unknown message with type %d ignored', packet[0])
+            self.logger.debug('Unknown message with type %d has been ignored', packet[0])
 
         return False

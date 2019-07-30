@@ -15,7 +15,8 @@ class BitTorrentProtocol(Protocol):
 
     def __init__(self, 
                  torrentContext:TorrentContext,
-                 protocolDelegation, 
+                 protocolDelegation,
+                 messageHandler,
                  peerInfo=None, 
                  initiator=False,
                  initiateState=None):
@@ -24,12 +25,14 @@ class BitTorrentProtocol(Protocol):
         self.initiator = initiator
         self.peerInfo = peerInfo
         self.stateList = list(reversed(BitTorrentProtocol.states))
+        self.messageHandler = messageHandler
         if initiateState is None:
             self.state = self._nextState()
         else:
             self.state = initiateState
         self.buf = b''
         self.expectedLength = None
+        self.logger = logging.getLogger('protocol')
 
     def sendMessage(self, message):
         """commit message to protocol"""
@@ -41,6 +44,7 @@ class BitTorrentProtocol(Protocol):
     def packetReceived(self, packet):
         nextState = self.state.packetReceived(packet)
         if nextState:
+            self.logger.debug('Swith to next protocol state. %s', self.peerInfo.endpoint)
             oldState = self.state
             self.state = self._nextState()
             # We see the transition from handshake to connected as peer-connected event. 

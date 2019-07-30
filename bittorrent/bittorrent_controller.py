@@ -4,7 +4,7 @@ from twisted.internet.endpoints import TCP4ClientEndpoint, connectProtocol
 from .context import PeerInfo, TorrentContext
 from .discovery import PeerDiscovery
 from .storage import Storage
-from .controller import ConnectionScheduler
+from .controller import ConnectionScheduler, MessageHandler
 from .protocol import BitTorrentProtocol
 
 
@@ -19,6 +19,7 @@ class BitTorrentController:
         self.peerDiscovery = PeerDiscovery(torrentContext, self.connectionScheduler)
         self.storage = Storage(torrentContext, self)
         self.logger = logging.getLogger(f'BitTorrentController')
+        self.messageHandler = MessageHandler(torrentContext)
 
     @classmethod
     def createFromTorrentFile(clz, file, root, reactor) -> 'BitTorrentController':
@@ -52,6 +53,7 @@ class BitTorrentController:
         protocol = BitTorrentProtocol(
             torrentContext=self.torrentContext,
             protocolDelegation=self.connectionScheduler, 
+            messageHandler=self.messageHandler,
             peerInfo=peerInfo,
             initiator=True)
         connectProtocol(endpoint, protocol)

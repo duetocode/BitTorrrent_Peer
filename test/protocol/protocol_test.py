@@ -1,11 +1,13 @@
 from struct import pack
 from bittorrent.protocol import BitTorrentProtocol
+from bittorrent.context import PeerInfo, Endpoint
 
 def test_dataReceived():
     mockState = MockState(None)
 
-    protocol = BitTorrentProtocol(None, None, initiateState=mockState)
+    protocol = BitTorrentProtocol(None, None, None, initiateState=mockState)
     protocol.stateList = [MockState]
+    protocol.peerInfo = PeerInfo(endpoint=Endpoint('0.0.0.0', 21))
 
     # connection made
     protocol.connectionMade()

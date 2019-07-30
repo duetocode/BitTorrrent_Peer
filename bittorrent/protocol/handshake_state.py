@@ -44,6 +44,10 @@ class HandshakeState:
             # Save the peer id if we do not have one
             self.protocol.peerInfo.id = peerId
 
+        self.logger.debug(f'Connected to %s with peer id %s', 
+            self.protocol.peerInfo.endpoint,
+            peerId)
+
         # Send back handshake message if we are not the initiator
         if not self.protocol.initiator:
             self.sendHandshakeMessage()

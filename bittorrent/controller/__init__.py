@@ -1,2 +1,2 @@
 from .connection_scheduler import ConnectionScheduler
-#from .message_handler import MessageHandler
+from .message_handler import MessageHandler
