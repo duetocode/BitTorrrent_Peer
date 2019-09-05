@@ -1,7 +1,7 @@
 from .base import Handler
 from bittorrent.protocol.message import Unchoke
 
-class UnchokeHandler(Handler):
+class NotInterestedHandler(Handler):
 
     def messageReceived(self, message:Unchoke, protocol):
-        protocol.choked = False
+        protocol.interested = False

@@ -12,10 +12,14 @@ class MessageHandler:
             self.handlers = [
                 ChokeHandler(torrentContext), 
                 UnchokeHandler(torrentContext),
+                InterestedHandler(torrentContext),
+                NotInterestedHandler(torrentContext),
+                None,
+                BitfieldHandler(torrentContext),
                 None,
                 None,
                 None,
-                BitfieldHandler(torrentContext)
+                PortHandler(torrentContext)
             ]
         self.logger = logging.getLogger('controller.message.handler')
         

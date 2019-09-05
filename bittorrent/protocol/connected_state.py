@@ -6,6 +6,8 @@ class ConnectedState:
     def __init__(self, protocol):
         self.protocol = protocol
         self.logger = logging.getLogger('protocol.ConnectedState')
+        protocol.choked = True
+        protocol.interested = False
 
     def packetReceived(self, packet):
         if packet is None or len(packet) < 1:

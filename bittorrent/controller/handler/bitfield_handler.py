@@ -6,6 +6,6 @@ class BitfieldHandler:
     def __init__(self, torrentContext):
         self.torrentContext = torrentContext
 
-    def messageReceived(self, message, protocol):
+    def messageReceived(self, message:Bitfield, protocol):
         # Update peer pieces list
-        pass
+        protocol.peerInfo.pieces = message.array

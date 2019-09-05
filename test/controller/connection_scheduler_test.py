@@ -2,7 +2,7 @@ import pytest
 from types import SimpleNamespace
 from typing import List
 from bittorrent.controller import ConnectionScheduler
-from bittorrent.context import PeerInfo, Endpoint
+from bittorrent.context import PeerInfo, Endpoint, PieceInfo, PieceState
 
 def test_peerDiscovered(scheduler:ConnectionScheduler, mockPeerList:List[PeerInfo]):
 
@@ -46,7 +46,7 @@ def test_unkown_peer_connected(scheduler:ConnectionScheduler, mockPeerList):
         discoveredPeers = peers
 
     peerInfo = mockPeerList[0]
-    pieces = ["PIECE"]
+    pieces = [PieceInfo(state=PieceState.Have)]
     scheduler.peerDiscovered = peerDiscovered
 
     scheduler.delegation = SimpleNamespace(torrentContext=SimpleNamespace(pieces=pieces))
@@ -55,7 +55,7 @@ def test_unkown_peer_connected(scheduler:ConnectionScheduler, mockPeerList):
     scheduler.peerConnected(protocol)
 
     assert discoveredPeers is not None and discoveredPeers[0] is peerInfo
-    assert actualMessage is not None and actualMessage.pieces is pieces
+    assert actualMessage is not None
 
 def test_known_peer_connected(scheduler:ConnectionScheduler, mockPeerList):
     actualMessage = None
@@ -63,7 +63,7 @@ def test_known_peer_connected(scheduler:ConnectionScheduler, mockPeerList):
         nonlocal actualMessage
         actualMessage = msg
     peerInfo = mockPeerList[0]
-    pieces = ['PIECE']
+    pieces = [PieceInfo(state=PieceState.Have)]
     knownPeer = PeerInfo(endpoint=peerInfo.endpoint)
     scheduler.knownPeers[knownPeer.endpoint] = knownPeer
 

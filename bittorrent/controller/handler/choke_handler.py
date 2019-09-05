@@ -4,4 +4,4 @@ from bittorrent.protocol.message import Choke
 class ChokeHandler(Handler):
 
     def messageReceived(self, message:Choke, protocol):
-        protocol.choke = True
+        protocol.choked = True

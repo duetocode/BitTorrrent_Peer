@@ -5,20 +5,21 @@ from bittorrent.context import PieceInfo, PieceState
 
 class Bitfield(Message):
 
-    def __init__(self, pieces:List[PieceInfo]):
+    def __init__(self, pieces:List[PieceInfo]=None):
         self.id = 5
-        self.pieces = pieces
+        if pieces is not None:
+            self.array = BitArray([p.state == PieceState.Have for p in pieces])
+        else:
+            self.array = None
         
     @classmethod
     def parse(clazz, rawData:bytes) -> 'Bitfield':
         # parse rawdata into piece info list
-        bitArray = BitArray(rawData)
-        
-        pieces = list([PieceInfo(i, PieceState.Have if v else PieceState.NotHave) for i, v in enumerate(bitArray)])
+        bitfield = Bitfield()
+        bitfield.array = BitArray(rawData)
 
-        return Bitfield(pieces)
+        return bitfield
 
     def serialize(self) -> bytes:
         # serialize piece info list into bytestring
-        bitArray = BitArray([p.state == PieceState.Have for p in self.pieces])
-        return bitArray.tobytes()
+        return self.array.tobytes()
